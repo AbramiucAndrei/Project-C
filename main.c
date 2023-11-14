@@ -491,11 +491,15 @@ int main()
     //n is its lenght
     Transaction trans[150]={};
     int n=0;
+    //import data from file "data.txt"
     import_data(trans,&n,f);
+    //numbers of transactions until now
     int last=n;
 
+    //main User Interface
     ui(trans,&n);
-
+        
+    //saves the data in the "data.txt" file
     save_data(trans,last,n,f);
     fclose(f);
     return 0;
