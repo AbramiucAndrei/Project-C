@@ -87,16 +87,20 @@ Transaction read_trans(){
         scanf("%d%d%d",&d,&m,&y);
     }while(valid_date(d,m,y)==0);
 
+
+    char buffer[20];
+    gets(buffer);
+    //buffer clear
+
     char desc[50];
-    //do{
     printf("Enter description:");
-    scanf("%s",&desc);
-   // }while(!valid_desc(desc));
+    gets(desc);
+
 
     double _amount;
     do{
         printf("Enter amount: ");
-        scanf("%f",&_amount);
+        scanf("%lf",&_amount);
     }while(!valid_amount(_amount));
 
     char __type[20];
@@ -270,19 +274,73 @@ void summary(Transaction v[],int len){
     in=income_summary_between(v,len,(_date){d1,m1,y1},(_date){d2,m2,y2});
     out=outcome_summary_between(v,len,(_date){d1,m1,y1},(_date){d2,m2,y2});
 
-    printf("Income between the 2 dates entered above:%f\n",in);
-    printf("Outcome between the 2 dates entered above:%f\n",out);
+    printf("Income between the 2 dates entered above:%.2f\n",in);
+    printf("Outcome between the 2 dates entered above:%.2f\n",out);
+}
+
+void show_menu(){
+    //prints the commands menu
+    printf("\n1.Add a new transaction\n");
+    printf("2.Show past transactions\n");
+    printf("3.Calculate balance\n");
+    printf("4.Show the summary of transactions made between 2 dates\n");
+    printf("5.Exit\n\n");
+
+}
+
+void ui(Transaction v[],int *n){
+    /* this funtion shows the menu and interracts with the user
+        through the console
+        here we have all the funtionalities of the program,
+        also including the exit
+    */
+
+    bool execute=true;
+
+    while(execute==true){
+            show_menu();
+            int command;
+            do{
+                printf("Enter the command:");
+                scanf("%d",&command);
+                printf("\n");
+            }while(!(command>=1 && command<=5));
+
+            switch(command){
+                case 1:
+                    //RECORD NEW TRANSACTION
+                    record_new_trans(v,n);
+                    break;
+                case 2:
+                    //PRINT PAST TRANSACTIONS
+                    print_past_trans(v,*(n));
+                    break;
+                case 3:
+                    //PRINTS BALANCE
+                    printf("%.2lf\n",calculate_balance(v,*(n)));
+                    break;
+                case 4:
+                    //PRINTS THE INCOME AND OUTCOME SUMMARY FOR A
+                    //SPECIFIC PERIOD OF TIME , ENTERED BY THE USER
+                    summary(v,*(n));
+                    break;
+                case 5:
+                    //EXIT
+                    execute=false;
+                    printf("BYE!");
+                    break;
+            }
+    }
 }
 
 void save_data(Transaction v[],int last,int n,FILE *f){
     //saves the data in file "data.txt"
 
-    if(last<n) fprintf(f,"\n");
+   // if(last<n) fprintf(f,"\n");
     for(int i=last;i<n;i++){
         fprintf(f,"%02d\n%02d\n%d\n",v[i].date.day,v[i].date.month,v[i].date.year);
         fprintf(f,"%s\n%.2f\n%s\n",v[i].description,v[i].amount,v[i]._type);
     }
-
 }
 void import_data(Transaction v[],int *n,FILE *f){
     //imports the data in file "data.txt"
@@ -293,23 +351,23 @@ void import_data(Transaction v[],int *n,FILE *f){
     while(!feof(f)){
 
         fscanf(f,"%d%d%d\n",&d,&m,&y);
-        //printf("%d %d %d\n",d,m,y);
+
         fgets(descr,49,f);
         strtok(descr,"\n");
-        //printf("%s",descr);
+        //ELIMINATE \N
+
         fscanf(f,"%lf\n",&money);
-         //printf("%lf\n",money);
+
         fgets(typee,19,f);
         strtok(typee,"\n");
-        //printf("%s",typee);
+        //ELIMINATE THE \N FROM THE END
+
+        char buffer[50];
+        fgets(buffer,49,f);
+        //CLEAR THE BUFFER//
 
         Transaction t=create_trans(d,m,y,descr,money,typee);
-        //print_trans(t);
-        //printf("%d %d %d %s %lf %s",d,m,y,t.description,t.amount,t._type);
-       // print_trans(t);
-        v[*(n)]=t;
-       // print_trans(v[*(n)]);
-        *(n)+=1;
+        add_trans(v,n,t);
     }
 }
 
@@ -424,20 +482,22 @@ void tests(){
 }
 int main()
 {
-    // !!!NO UI UNTIL NOW!!!
+    tests();
     FILE *f=fopen("data.txt","r+");
     if(f==NULL) assert(false);
 
-    tests();
+
+    //trans is the main list of transactions
+    //n is its lenght
     Transaction trans[150]={};
     int n=0;
     import_data(trans,&n,f);
-
     int last=n;
-    add_trans(trans,&n,create_trans(12,11,2013,"donation",124.2,"outcome"));
 
-    //I have to review how the data is stored in DATA.TXT
+    ui(trans,&n);
+
     save_data(trans,last,n,f);
     fclose(f);
     return 0;
 }
+
