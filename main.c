@@ -31,9 +31,8 @@ bool valid_amount(double amount)
 }
 
 bool valid_date(int day,int month,int year){
-    /*verifies if the date is a real date, and is not a future date*/
+    /*verifies if the date is a real date*/
     if(day<1 || month<1 || year<1) return 0;
-    if(year>2023) return 0;
 
     if(month==2){
         if(day<=28) return 1;
@@ -86,6 +85,7 @@ Transaction read_trans(){
         printf("Enter date (day:month:year): ");
         scanf("%d%d%d",&d,&m,&y);
     }while(valid_date(d,m,y)==0);
+    //READS THE DATE
 
 
     char buffer[20];
@@ -95,6 +95,7 @@ Transaction read_trans(){
     char desc[50];
     printf("Enter description:");
     gets(desc);
+    //READS THE DESCRIPTION OF THE TRANSACTION
 
 
     double _amount;
@@ -102,12 +103,14 @@ Transaction read_trans(){
         printf("Enter amount: ");
         scanf("%lf",&_amount);
     }while(!valid_amount(_amount));
+    //READS THE AMOUNT
 
     char __type[20];
     do{
         printf("Enter type (income or outcome): ");
         scanf("%s",&__type);
     }while(!valid_type(__type));
+    //READS THE TYPE
 
     return create_trans(d,m,y,desc,_amount,__type);
 }
@@ -172,7 +175,7 @@ bool x_between_dates(_date l,_date r,_date x){
     //verifies if the date 'x' is cronologically between
     //date 'l' and 'r'
     //in case of 'l' and 'r' beeing reversed cronologically,
-    //they are swapped
+    //they are swapped AND ONLY AFTER THAT THE CONDITION IS VERIFIED
     if(inversed_dates(l,r)==1){
         _date aux=l;
         l=r;
@@ -245,6 +248,8 @@ double outcome_summary_between(Transaction v[],int len,_date d1,_date d2){
 void summary(Transaction v[],int len){
     /* prints  the total income and outcome for a specifi period of time
         entered by the user in the console*/
+
+    //READS FIRST AND SECOND DATA
     int d1,m1,y1;
     int d2,m2,y2;
 
@@ -263,11 +268,13 @@ void summary(Transaction v[],int len){
     date1=(_date){d1,m1,y1};
     date2=(_date){d2,m2,y2};
 
+    //VERIFIES THE DATA 1 AND DATA 2 ARE PLACED CRONOLOGICALLY
     if(inversed_dates((_date){d1,m1,y1},(_date){d2,m2,y2})==1){
         _date aux=date1;
         date1=date2;
         date2=aux;
     }
+
 
 
     double in,out;
@@ -305,6 +312,7 @@ void ui(Transaction v[],int *n){
                 scanf("%d",&command);
                 printf("\n");
             }while(!(command>=1 && command<=5));
+            //READS ONE OF THE 5 COMMANDS AVALIBLE
 
             switch(command){
                 case 1:
@@ -491,15 +499,11 @@ int main()
     //n is its lenght
     Transaction trans[150]={};
     int n=0;
-    //import data from file "data.txt"
     import_data(trans,&n,f);
-    //numbers of transactions until now
     int last=n;
 
-    //main User Interface
     ui(trans,&n);
-        
-    //saves the data in the "data.txt" file
+
     save_data(trans,last,n,f);
     fclose(f);
     return 0;
